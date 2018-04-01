@@ -6,16 +6,6 @@ import sys
 from scroll import Booklet
 
 
-def validate_args(args):
-    for id in args.service_body_ids.split(','):
-        try:
-            int(id)
-        except:
-            raise Exception('--service-body-ids is invalid, invalid value: {}'.format(id))
-    if args.main_header_field == args.second_header_field:
-        raise Exception('--main-header-field and --second-header-field cannot be the same')
-
-
 def get_data(args):
     def form_sort_string():
         key_map = {
@@ -158,7 +148,13 @@ def main():
     )
 
     args = parser.parse_args()
-    validate_args(args)
+    for id in args.service_body_ids.split(','):
+        try:
+            int(id)
+        except:
+            raise Exception('--service-body-ids is invalid, invalid value: {}'.format(id))
+    if args.main_header_field == args.second_header_field:
+        raise Exception('--main-header-field and --second-header-field cannot be the same')
 
     meetings, formats = get_data(args)
     get_pdf(args, meetings, formats)
