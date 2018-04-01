@@ -62,14 +62,14 @@ optional arguments:
 
 ## Examples
 #### Example 1
-Generate test.pdf, targeting the letter paper size, for service bodies 753 and 751
+Generate example_1.pdf, targeting the letter paper size, for service bodies 753 and 751
 ```
 python3 scroll.py 753,751 letter example_1.pdf
 ```
 Output: [example_1.pdf](https://github.com/jbraswell/scroll/blob/master/example_1.pdf)
 
 #### Example 2
-Generate test.pdf, targeting the letter paper size, for service body 762 and its children
+Generate example_2.pdf, targeting the letter paper size, for service body 762 and its children
 ```
 $ python3 scroll.py 762 letter example_2.pdf --recursive
 ```
@@ -83,7 +83,7 @@ $ python3 scroll.py 753,751 letter example_3.pdf --meeting-font=dejavuserif
 Output: [example_3.pdf](https://github.com/jbraswell/scroll/blob/master/example_3.pdf)
 
 #### Example 4
-Generate test.pdf, targeting the letter paper size, for service body 762 and its children, adding secondary 'city' headers, changing font sizes to 8, changing the width of the time and duration columns
+Generate example_4.pdf, targeting the letter paper size, for service body 762 and its children, adding secondary 'city' headers, changing font sizes to 8, changing the width of the time and duration columns
 ```
 $ python3 scroll.py 762 letter example_4.pdf \
     --recursive \
@@ -97,7 +97,7 @@ $ python3 scroll.py 762 letter example_4.pdf \
 Output: [example_4.pdf](https://github.com/jbraswell/scroll/blob/master/example_4.pdf)
 
 #### Example 5
-Generate test.pdf, same as previous, but bookletized
+Generate example_5.pdf, same as previous, but bookletized
 ```
 $ python3 scroll.py 762 letter example_5.pdf \
     --recursive \
