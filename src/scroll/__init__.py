@@ -364,7 +364,7 @@ class Booklet:
             # This produces booklet pages as single pdf pages. They're designed to be printed
             # using the "booklet" option on a printer, meaning two per page. For this reason,
             # we're dividing the specified paper size by 2.
-            pdf = FPDF(format=(self.paper_size[0] / 2, self.paper_size[1] / 2))
+            pdf = FPDF(format=(self.paper_size[1] / 2, self.paper_size[0]))
         pdf.set_margins(5, 5)
         pdf.set_auto_page_break(0, 5)
         return pdf
