@@ -87,17 +87,22 @@ def get_timedelta(d, key):
 
 class Meeting:
     def __init__(self, bmlt_object):
-        self.name = get_required_str(bmlt_object, 'meeting_name')
+        self.name = self.replace_unicode_quotes(get_required_str(bmlt_object, 'meeting_name'))
         self.start_time = get_time(bmlt_object, 'start_time')
         self.duration = get_timedelta(bmlt_object, 'duration_time')
         self.weekday = get_int(bmlt_object, 'weekday_tinyint', valid_choices=[1, 2, 3, 4, 5, 6, 7])
-        self.facility = bmlt_object.get('location_text')
-        self.street = bmlt_object.get('location_street')
-        self.city = bmlt_object.get('location_municipality')
-        self.province = bmlt_object.get('location_province')
-        self.postal_code = bmlt_object.get('location_postal_code_1')
-        self.nation = bmlt_object.get('nation')
-        self.formats = bmlt_object.get('formats', '')
+        self.facility = self.replace_unicode_quotes(bmlt_object.get('location_text'))
+        self.street = self.replace_unicode_quotes(bmlt_object.get('location_street'))
+        self.city = self.replace_unicode_quotes(bmlt_object.get('location_municipality'))
+        self.province = self.replace_unicode_quotes(bmlt_object.get('location_province'))
+        self.postal_code = self.replace_unicode_quotes(bmlt_object.get('location_postal_code_1'))
+        self.nation = self.replace_unicode_quotes(bmlt_object.get('nation'))
+        self.formats = self.replace_unicode_quotes(bmlt_object.get('formats', ''))
+
+    def replace_unicode_quotes(self, s):
+        if not s:
+            return s
+        return s.replace("\u2018", "'").replace("\u2019", "'")
 
     @property
     def location(self):
