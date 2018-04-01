@@ -66,27 +66,32 @@ Generate test.pdf, targeting the letter paper size, for service bodies 753 and 7
 ```
 (scroll) [jbraswell@localhost src]$ python3 scroll.py 753,751 letter test.pdf
 ```
+Output: [test.pdf](https://github.com/jbraswell/scroll/raw/master/example_1.pdf)
 
 #### Example 2
 Generate test.pdf, targeting the letter paper size, for service body 762 and its hildren
 ```
 (scroll) [jbraswell@localhost src]$ python3 scroll.py 762 letter test.pdf --recursive
 ```
+Output: [test.pdf](https://github.com/jbraswell/scroll/raw/master/example_2.pdf)
 
 #### Example 3
 Generate test.pdf, targeting the letter paper size, for service bodies 753 and 751, customizing the meeting font
 ```
 (scroll) [jbraswell@localhost src]$ python3 scroll.py 753,751 letter test.pdf --meeting-font=times
 ```
+Output: [test.pdf](https://github.com/jbraswell/scroll/raw/master/example_3.pdf)
 
 #### Example 4
 Generate test.pdf, targeting the letter paper size, for service body 762 and its children, adding secondary 'city' headers, changing font sizes to 8, changing the width of the time and duration columns
 ```
 (scroll) [jbraswell@localhost src]$ python3 scroll.py 762 --recursive --main-header-field=weekday --second-header-field=city --meeting-font-size=8 --header-font-size=8 --time-column-width=12 --duration-column-width=10
 ```
+Output: [test.pdf](https://github.com/jbraswell/scroll/raw/master/example_4.pdf)
 
 #### Example 5
 Generate test.pdf, same as previous, but bookletized
 ```
 (scroll) [jbraswell@localhost src]$ python3 scroll.py 762 --recursive --bookletize --main-header-field=weekday --second-header-field=city --meeting-font-size=8 --header-font-size=8 --time-column-width=12 --duration-column-width=10
 ```
+Output: [test.pdf](https://github.com/jbraswell/scroll/raw/master/example_5.pdf)
