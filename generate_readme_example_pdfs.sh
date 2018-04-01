@@ -6,17 +6,17 @@ python3 scroll.py 762 letter ../example_4.pdf \
     --recursive \
     --main-header-field=weekday \
     --second-header-field=city \
-    --meeting-font-size=7 \
-    --header-font-size=7 \
-    --time-column-width=12 \
+    --meeting-font-size=8 \
+    --header-font-size=8 \
+    --time-column-width=15 \
     --duration-column-width=10
 python3 scroll.py 762 letter ../example_5.pdf \
     --recursive \
     --bookletize \
     --main-header-field=weekday \
     --second-header-field=city \
-    --meeting-font-size=7 \
-    --header-font-size=7 \
-    --time-column-width=12 \
+    --meeting-font-size=8 \
+    --header-font-size=8 \
+    --time-column-width=15 \
     --duration-column-width=10
 cd ..

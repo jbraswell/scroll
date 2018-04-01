@@ -46,18 +46,18 @@ optional arguments:
                         booklet pages per PDF page
   --time-column-width TIME_COLUMN_WIDTH
                         The width, in mm, of the meeting start time column.
-                        Defaults to 15
+                        Defaults to 20
   --duration-column-width DURATION_COLUMN_WIDTH
                         The width, in mm, of the meeting duration column.
                         Defaults to 15
   --meeting-font {dejavusans,dejavuserif}
                         The font used for each meeting. Defaults to dejavusans
   --meeting-font-size MEETING_FONT_SIZE
-                        The font size used for each meeting. Defaults to 9
+                        The font size used for each meeting. Defaults to 10
   --header-font {dejavusans,dejavuserif}
                         The font used for headers. Defaults to dejavusans
   --header-font-size HEADER_FONT_SIZE
-                        The font size used for headers. Defaults to 9 
+                        The font size used for headers. Defaults to 10 
 ```
 
 ## Examples
@@ -89,9 +89,9 @@ $ python3 scroll.py 762 letter example_4.pdf \
     --recursive \
     --main-header-field=weekday \
     --second-header-field=city \
-    --meeting-font-size=7 \
-    --header-font-size=7 \
-    --time-column-width=12 \
+    --meeting-font-size=8 \
+    --header-font-size=8 \
+    --time-column-width=15 \
     --duration-column-width=10
 ```
 Output: [example_4.pdf](https://github.com/jbraswell/scroll/blob/master/example_4.pdf)
@@ -104,9 +104,9 @@ $ python3 scroll.py 762 letter example_5.pdf \
     --bookletize \
     --main-header-field=weekday \
     --second-header-field=city \
-    --meeting-font-size=7 \
-    --header-font-size=7 \
-    --time-column-width=12 \
+    --meeting-font-size=8 \
+    --header-font-size=8 \
+    --time-column-width=15 \
     --duration-column-width=10
 ```
 Output: [example_5.pdf](https://github.com/jbraswell/scroll/blob/master/example_5.pdf)

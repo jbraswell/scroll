@@ -108,8 +108,8 @@ def main():
         '--time-column-width',
         dest='time_column_width',
         type=int,
-        default=15,
-        help='The width, in mm, of the meeting start time column. Defaults to 15'
+        default=20,
+        help='The width, in mm, of the meeting start time column. Defaults to 20'
     )
     parser.add_argument(
         '--duration-column-width',
@@ -129,8 +129,8 @@ def main():
         '--meeting-font-size',
         dest='meeting_font_size',
         type=int,
-        default=9,
-        help='The font size used for each meeting. Defaults to 9'
+        default=10,
+        help='The font size used for each meeting. Defaults to 10'
     )
     parser.add_argument(
         '--header-font',
@@ -143,8 +143,8 @@ def main():
         '--header-font-size',
         dest='header_font_size',
         type=int,
-        default=9,
-        help='The font size used for headers. Defaults to 9'
+        default=10,
+        help='The font size used for headers. Defaults to 10'
     )
 
     args = parser.parse_args()
