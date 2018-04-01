@@ -69,7 +69,7 @@ Generate test.pdf, targeting the letter paper size, for service bodies 753 and 7
 Output: [test.pdf](https://github.com/jbraswell/scroll/blob/master/example_1.pdf)
 
 #### Example 2
-Generate test.pdf, targeting the letter paper size, for service body 762 and its hildren
+Generate test.pdf, targeting the letter paper size, for service body 762 and its children
 ```
 [jbraswell@localhost src]$ python3 scroll.py 762 letter test.pdf --recursive
 ```
