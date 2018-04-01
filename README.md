@@ -1,9 +1,17 @@
 # scroll
 In its present form, scroll is a python-based command line utility for generating meeting list PDFs from [tomato](https://github.com/jbraswell/tomato). In the future, scroll will be a full-featured website for generating meeting list PDFs.
 
+## Installation
+Scroll requires Python 3 and the [requests](http://docs.python-requests.org/en/master/) library.
+
+1. [Install python](https://www.python.org/downloads/)
+2. [Install requests](http://docs.python-requests.org/en/master/user/install/)
+
+No effort has been made to create a proper pypi package for scroll, so you'll need to clone this repository. After cloning, you can run `scroll.py` with `python3`. See the examples below.
+ 
 ## Usage
 ```
-(scroll) [jbraswell@localhost src]$ python3 main.py --help
+(scroll) [jbraswell@localhost src]$ python3 scroll.py --help
 usage: scroll [-h] [--recursive] [--main-header-field {weekday,city}]
               [--second-header-field {weekday,city}] [--bookletize]
               [--time-column-width TIME_COLUMN_WIDTH]
@@ -53,15 +61,15 @@ optional arguments:
 ## Examples
 Generate test.pdf, targeting the tabloid paper size, for service bodies 753 and 751
 ```
-(scroll) [jbraswell@localhost src]$ python3 main.py 753,751 tabloid test.pdf
+(scroll) [jbraswell@localhost src]$ python3 scroll.py 753,751 tabloid test.pdf
 ```
 
 Generate test.pdf, targeting the tabloid paper size, for service body 762 and all of its children
 ```
-(scroll) [jbraswell@localhost src]$ python3 main.py 762 tabloid test.pdf --recursive
+(scroll) [jbraswell@localhost src]$ python3 scroll.py 762 tabloid test.pdf --recursive
 ```
 
 Generate test.pdf, targeting the tabloid paper size, for service bodies 753 and 751, customizing the meeting font
 ```
-(scroll) [jbraswell@localhost src]$ python3 main.py 753,751 tabloid test.pdf --meeting-font=times
+(scroll) [jbraswell@localhost src]$ python3 scroll.py 753,751 tabloid test.pdf --meeting-font=times
 ```
