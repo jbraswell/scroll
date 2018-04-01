@@ -1,4 +1,5 @@
 import datetime
+import os
 from fpdf import FPDF
 
 
@@ -87,22 +88,17 @@ def get_timedelta(d, key):
 
 class Meeting:
     def __init__(self, bmlt_object):
-        self.name = self.replace_unicode_quotes(get_required_str(bmlt_object, 'meeting_name'))
+        self.name = get_required_str(bmlt_object, 'meeting_name')
         self.start_time = get_time(bmlt_object, 'start_time')
         self.duration = get_timedelta(bmlt_object, 'duration_time')
         self.weekday = get_int(bmlt_object, 'weekday_tinyint', valid_choices=[1, 2, 3, 4, 5, 6, 7])
-        self.facility = self.replace_unicode_quotes(bmlt_object.get('location_text'))
-        self.street = self.replace_unicode_quotes(bmlt_object.get('location_street'))
-        self.city = self.replace_unicode_quotes(bmlt_object.get('location_municipality'))
-        self.province = self.replace_unicode_quotes(bmlt_object.get('location_province'))
-        self.postal_code = self.replace_unicode_quotes(bmlt_object.get('location_postal_code_1'))
-        self.nation = self.replace_unicode_quotes(bmlt_object.get('nation'))
-        self.formats = self.replace_unicode_quotes(bmlt_object.get('formats', ''))
-
-    def replace_unicode_quotes(self, s):
-        if not s:
-            return s
-        return s.replace("\u2018", "'").replace("\u2019", "'")
+        self.facility = bmlt_object.get('location_text')
+        self.street = bmlt_object.get('location_street')
+        self.city = bmlt_object.get('location_municipality')
+        self.province = bmlt_object.get('location_province')
+        self.postal_code = bmlt_object.get('location_postal_code_1')
+        self.nation = bmlt_object.get('nation')
+        self.formats = bmlt_object.get('formats', '')
 
     @property
     def location(self):
@@ -129,7 +125,7 @@ class PDFColumnEnd:
 
 
 class PDFMainSectionHeader:
-    def __init__(self, text, pdf_func, cell_width, line_padding=1, font='Courier', font_size=12):
+    def __init__(self, text, pdf_func, cell_width, line_padding=1, font='dejavusans', font_size=12):
         self.text = text
         self.pdf_func = pdf_func
         self.cell_width = cell_width
@@ -164,7 +160,7 @@ class PDFMainSectionHeader:
 
 
 class PDFSubSectionHeader:
-    def __init__(self, text, pdf_func, cell_width, line_padding=1, font='Courier', font_size=12):
+    def __init__(self, text, pdf_func, cell_width, line_padding=1, font='dejavusans', font_size=12):
         self.text = text
         self.pdf_func = pdf_func
         self.cell_width = cell_width
@@ -199,8 +195,8 @@ class PDFSubSectionHeader:
 
 
 class PDFMeeting:
-    def __init__(self, meeting, pdf_func, total_width, time_column_width=None, duration_column_width=None, font='Arial',
-                 font_size=12):
+    def __init__(self, meeting, pdf_func, total_width, time_column_width=None, duration_column_width=None,
+                 font='dejavusans', font_size=12):
         if not isinstance(meeting, Meeting):
             raise TypeError('Expected Meeting object')
         self.pdf_func = pdf_func
@@ -320,20 +316,18 @@ class Booklet:
         'tabloid': (279, 432),
     }
     VALID_FONTS = [
-        'arial',
-        'helvetica',
-        'courier',
-        'times'
+        'dejavusans',
+        'dejavuserif'
     ]
     HEADER_FIELD_WEEKDAY = 'weekday'
     HEADER_FIELD_CITY = 'city'
-    VALID_HEADER_FIELDS = {
+    VALID_HEADER_FIELDS = [
         HEADER_FIELD_WEEKDAY,
         HEADER_FIELD_CITY
-    }
+    ]
 
     def __init__(self, meetings, formats, output_file, bookletize=False, paper_size='Letter', time_column_width=None,
-                 duration_column_width=None, meeting_font='Arial', meeting_font_size=10, header_font='Arial',
+                 duration_column_width=None, meeting_font='dejavusans', meeting_font_size=10, header_font='dejavusans',
                  header_font_size=10, main_header_field='weekday', second_header_field=None):
         self._meetings_data = meetings
         self._formats_data = formats
@@ -372,6 +366,11 @@ class Booklet:
             pdf = FPDF(format=(self.paper_size[1] / 2, self.paper_size[0]))
         pdf.set_margins(5, 5)
         pdf.set_auto_page_break(0, 5)
+        base_font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dejavu-fonts-ttf-2.37/ttf/')
+        pdf.add_font('dejavusans', '', os.path.join(base_font_path, 'DejaVuSansCondensed.ttf'), uni=True)
+        pdf.add_font('dejavusans', 'B', os.path.join(base_font_path, 'DejaVuSansCondensed-Bold.ttf'), uni=True)
+        pdf.add_font('dejavuserif', '', os.path.join(base_font_path, 'DejaVuSerifCondensed.ttf'), uni=True)
+        pdf.add_font('dejavuserif', 'B', os.path.join(base_font_path, 'DejaVuSerifCondensed-Bold.ttf'), uni=True)
         return pdf
 
     def get_pdf_objects(self):

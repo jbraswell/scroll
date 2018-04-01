@@ -13,14 +13,14 @@ No effort has been made to create a proper pypi package for scroll, so you'll ne
  
 ## Usage
 ```
-[jbraswell@localhost src]$ python3 scroll.py --help
+$ python3 scroll.py --help
 usage: scroll [-h] [--recursive] [--main-header-field {weekday,city}]
               [--second-header-field {weekday,city}] [--bookletize]
               [--time-column-width TIME_COLUMN_WIDTH]
               [--duration-column-width DURATION_COLUMN_WIDTH]
-              [--meeting-font {arial,helvetica,courier,times}]
+              [--meeting-font {dejavusans,dejavuserif}]
               [--meeting-font-size MEETING_FONT_SIZE]
-              [--header-font {arial,helvetica,courier,times}]
+              [--header-font {dejavusans,dejavuserif}]
               [--header-font-size HEADER_FONT_SIZE]
               service_body_ids {letter,legal,tabloid} output_file
 
@@ -50,63 +50,63 @@ optional arguments:
   --duration-column-width DURATION_COLUMN_WIDTH
                         The width, in mm, of the meeting duration column.
                         Defaults to 15
-  --meeting-font {arial,helvetica,courier,times}
-                        The font used for each meeting. Defaults to arial
+  --meeting-font {dejavusans,dejavuserif}
+                        The font used for each meeting. Defaults to dejavusans
   --meeting-font-size MEETING_FONT_SIZE
-                        The font size used for each meeting. Defaults to 10
-  --header-font {arial,helvetica,courier,times}
-                        The font used for headers. Defaults to arial
+                        The font size used for each meeting. Defaults to 9
+  --header-font {dejavusans,dejavuserif}
+                        The font used for headers. Defaults to dejavusans
   --header-font-size HEADER_FONT_SIZE
-                        The font size used for headers. Defaults to 10
+                        The font size used for headers. Defaults to 9 
 ```
 
 ## Examples
 #### Example 1
 Generate test.pdf, targeting the letter paper size, for service bodies 753 and 751
 ```
-[jbraswell@localhost src]$ python3 scroll.py 753,751 letter test.pdf
+python3 scroll.py 753,751 letter example_1.pdf
 ```
-Output: [test.pdf](https://github.com/jbraswell/scroll/blob/master/example_1.pdf)
+Output: [example_1.pdf](https://github.com/jbraswell/scroll/blob/master/example_1.pdf)
 
 #### Example 2
 Generate test.pdf, targeting the letter paper size, for service body 762 and its children
 ```
-$ python3 scroll.py 762 letter test.pdf --recursive
+$ python3 scroll.py 762 letter example_2.pdf --recursive
 ```
-Output: [test.pdf](https://github.com/jbraswell/scroll/blob/master/example_2.pdf)
+Output: [example_2.pdf](https://github.com/jbraswell/scroll/blob/master/example_2.pdf)
 
 #### Example 3
-Generate test.pdf, targeting the letter paper size, for service bodies 753 and 751, customizing the meeting font
+Generate example_3.pdf, targeting the letter paper size, for service bodies 753 and 751, customizing the meeting font
 ```
-$ python3 scroll.py 753,751 letter test.pdf --meeting-font=times
+$ python3 scroll.py 753,751 letter example_3.pdf --meeting-font=dejavuserif
 ```
-Output: [test.pdf](https://github.com/jbraswell/scroll/blob/master/example_3.pdf)
+Output: [example_3.pdf](https://github.com/jbraswell/scroll/blob/master/example_3.pdf)
 
 #### Example 4
 Generate test.pdf, targeting the letter paper size, for service body 762 and its children, adding secondary 'city' headers, changing font sizes to 8, changing the width of the time and duration columns
 ```
-$ python3 scroll.py 762 letter test.pdf \
+$ python3 scroll.py 762 letter example_4.pdf \
     --recursive \
     --main-header-field=weekday \
     --second-header-field=city \
-    --meeting-font-size=8 \
-    --header-font-size=8 \
+    --meeting-font-size=7 \
+    --header-font-size=7 \
     --time-column-width=12 \
     --duration-column-width=10
 ```
-Output: [test.pdf](https://github.com/jbraswell/scroll/blob/master/example_4.pdf)
+Output: [example_4.pdf](https://github.com/jbraswell/scroll/blob/master/example_4.pdf)
 
 #### Example 5
 Generate test.pdf, same as previous, but bookletized
 ```
-$ python3 scroll.py 762 letter test.pdf \
+$ python3 scroll.py 762 letter example_5.pdf \
     --recursive \
     --bookletize \
     --main-header-field=weekday \
     --second-header-field=city \
-    --meeting-font-size=8 \
-    --header-font-size=8 \
+    --meeting-font-size=7 \
+    --header-font-size=7 \
     --time-column-width=12 \
     --duration-column-width=10
 ```
-Output: [test.pdf](https://github.com/jbraswell/scroll/blob/master/example_5.pdf)
+Output: [example_5.pdf](https://github.com/jbraswell/scroll/blob/master/example_5.pdf)

@@ -121,30 +121,30 @@ def main():
     parser.add_argument(
         '--meeting-font',
         dest='meeting_font',
-        default='arial',
+        default='dejavusans',
         choices=Booklet.VALID_FONTS,
-        help='The font used for each meeting. Defaults to arial'
+        help='The font used for each meeting. Defaults to dejavusans'
     )
     parser.add_argument(
         '--meeting-font-size',
         dest='meeting_font_size',
         type=int,
-        default=10,
-        help='The font size used for each meeting. Defaults to 10'
+        default=9,
+        help='The font size used for each meeting. Defaults to 9'
     )
     parser.add_argument(
         '--header-font',
         dest='header_font',
-        default='arial',
+        default='dejavusans',
         choices=Booklet.VALID_FONTS,
-        help='The font used for headers. Defaults to arial'
+        help='The font used for headers. Defaults to dejavusans'
     )
     parser.add_argument(
         '--header-font-size',
         dest='header_font_size',
         type=int,
-        default=10,
-        help='The font size used for headers. Defaults to 10'
+        default=9,
+        help='The font size used for headers. Defaults to 9'
     )
 
     args = parser.parse_args()
