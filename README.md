@@ -22,6 +22,7 @@ usage: scroll [-h] [--recursive] [--main-header-field {weekday,city}]
               [--meeting-font-size MEETING_FONT_SIZE]
               [--header-font {dejavusans,dejavuserif}]
               [--header-font-size HEADER_FONT_SIZE]
+              [--meeting-separator-color MEETING_SEPARATOR_COLOR]
               service_body_ids {letter,legal,tabloid} output_file
 
 positional arguments:
@@ -57,7 +58,9 @@ optional arguments:
   --header-font {dejavusans,dejavuserif}
                         The font used for headers. Defaults to dejavusans
   --header-font-size HEADER_FONT_SIZE
-                        The font size used for headers. Defaults to 10 
+                        The font size used for headers. Defaults to 10
+  --meeting-separator-color MEETING_SEPARATOR_COLOR
+                        Color, in hex, of the line that separates each meeting 
 ```
 
 ## Examples

@@ -59,6 +59,8 @@ def get_pdf(args, meetings, formats):
         kwargs['header_font_size'] = args.header_font_size
     if args.second_header_field:
         kwargs['second_header_field'] = args.second_header_field
+    if args.meeting_separator_color:
+        kwargs['meeting_separator_color'] = args.meeting_separator_color
     booklet = Booklet(meetings, formats, args.output_file, **kwargs)
     booklet.write_pdf()
 
@@ -145,6 +147,12 @@ def main():
         type=int,
         default=10,
         help='The font size used for headers. Defaults to 10'
+    )
+    parser.add_argument(
+        '--meeting-separator-color',
+        dest='meeting_separator_color',
+        default='#D3D3D3',
+        help='Color, in hex, of the line that separates each meeting'
     )
 
     args = parser.parse_args()

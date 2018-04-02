@@ -1,6 +1,7 @@
 import datetime
 import os
 from fpdf import FPDF
+from fpdf.html import hex2dec
 
 
 weekdays = [
@@ -196,7 +197,7 @@ class PDFSubSectionHeader:
 
 class PDFMeeting:
     def __init__(self, meeting, pdf_func, total_width, time_column_width=None, duration_column_width=None,
-                 font='dejavusans', font_size=12):
+                 font='dejavusans', font_size=12, separator_color='#D3D3D3'):
         if not isinstance(meeting, Meeting):
             raise TypeError('Expected Meeting object')
         self.pdf_func = pdf_func
@@ -206,6 +207,9 @@ class PDFMeeting:
         self.font = font
         self.font_size = font_size
         self.total_width = total_width
+        self.separator_color = separator_color
+        if not self.separator_color.startswith('#'):
+            self.separator_color = '#' + self.separator_color
 
     def get_time(self):
         ampm = 'AM'
@@ -300,7 +304,7 @@ class PDFMeeting:
         pdf.multi_cell(self.meeting_column_width, h=pdf.font_size, txt=text, border=0, align='L')
 
         pdf.ln(h=1)
-        pdf.set_draw_color(211, 211, 211)
+        pdf.set_draw_color(*hex2dec(self.separator_color))
         if x is not None and y is not None:
             height = self.height - 1 - pdf.line_width
             pdf.line(x, y + height, x + self.total_width, y + height)
@@ -330,7 +334,8 @@ class Booklet:
 
     def __init__(self, meetings, formats, output_file, bookletize=False, paper_size='Letter', time_column_width=None,
                  duration_column_width=None, meeting_font='dejavusans', meeting_font_size=10, header_font='dejavusans',
-                 header_font_size=10, main_header_field='weekday', second_header_field=None):
+                 header_font_size=10, main_header_field='weekday', second_header_field=None,
+                 meeting_separator_color='#D3D3D3'):
         self._meetings_data = meetings
         self._formats_data = formats
         self.output_file = output_file
@@ -354,6 +359,7 @@ class Booklet:
         if second_header_field and second_header_field not in self.VALID_HEADER_FIELDS:
             raise ValueError("Invalid second header field, valid choices are: {}".format(', '.join(self.VALID_HEADER_FIELDS)))
         self.second_header_field = second_header_field
+        self.meeting_separator_color = meeting_separator_color
 
     def _get_pdf_obj(self):
         if self.bookletize:
@@ -418,7 +424,7 @@ class Booklet:
             append_objs = []
             meeting = PDFMeeting(Meeting(m), self._get_pdf_obj, total_width, time_column_width=self.time_column_width,
                                  duration_column_width=self.duration_column_width, font=self.meeting_font,
-                                 font_size=self.meeting_font_size)
+                                 font_size=self.meeting_font_size, separator_color=self.meeting_separator_color)
             new_main_header = getattr(meeting.meeting, self.main_header_field)
             if new_main_header != prev_main_header:
                 if self.main_header_field == self.HEADER_FIELD_WEEKDAY:
