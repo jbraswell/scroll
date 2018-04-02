@@ -210,12 +210,12 @@ class PDFMeeting:
     def get_time(self):
         ampm = 'AM'
         hour, minute = str(self.meeting.start_time).split(':')[:2]
-        if int(hour) > 12:
-            hour = str(int(hour) - 12)
+        hour = int(hour)
+        if hour > 11:
             ampm = 'PM'
-        else:
-            hour = str(int(hour))
-        return hour + ':' + minute + ampm
+        if hour > 12:
+            hour = hour - 12
+        return str(hour) + ':' + minute + ampm
 
     def get_duration(self):
         hour, minute = str(self.meeting.duration).split(':')[:2]
