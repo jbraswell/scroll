@@ -213,6 +213,8 @@ class PDFMeeting:
         if int(hour) > 12:
             hour = str(int(hour) - 12)
             ampm = 'PM'
+        else:
+            hour = str(int(hour))
         return hour + ':' + minute + ampm
 
     def get_duration(self):
