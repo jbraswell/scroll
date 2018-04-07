@@ -61,6 +61,26 @@ def get_pdf(args, meetings, formats):
         kwargs['second_header_field'] = args.second_header_field
     if args.meeting_separator_color:
         kwargs['meeting_separator_color'] = args.meeting_separator_color
+    if args.header_font:
+        kwargs['header_font'] = args.header_font
+    if args.header_font_size:
+        kwargs['header_font_size'] = args.header_font_size
+    if args.second_header_field:
+        kwargs['second_header_field'] = args.second_header_field
+    if args.formats_table_header_text:
+        kwargs['formats_table_header_text'] = args.formats_table_header_text
+    if args.formats_table_header_font:
+        kwargs['formats_table_header_font'] = args.formats_table_header_font
+    if args.formats_table_header_font_size:
+        kwargs['formats_table_header_font_size'] = args.formats_table_header_font_size
+    if args.formats_table_key_column_width:
+        kwargs['formats_table_key_column_width'] = args.formats_table_key_column_width
+    if args.formats_table_margin_width:
+        kwargs['formats_table_margin_width'] = args.formats_table_margin_width
+    if args.formats_table_header_font_color:
+        kwargs['formats_table_header_font_color'] = args.formats_table_header_font_color
+    if args.formats_table_header_fill_color:
+        kwargs['formats_table_header_fill_color'] = args.formats_table_header_fill_color
     booklet = Booklet(meetings, formats, args.output_file, **kwargs)
     booklet.write_pdf()
 
@@ -154,6 +174,51 @@ def main():
         default='#D3D3D3',
         help='Color, in hex, of the line that separates each meeting'
     )
+    parser.add_argument(
+        '--formats-table-header-text',
+        dest='formats_table_header_text',
+        default='Meeting Format Legend',
+        help='Text to be displayed above the meeting formats legend table'
+    )
+    parser.add_argument(
+        '--formats-table-header-font',
+        dest='formats_table_header_font',
+        default='dejavusans',
+        help='The font used for the text displayed above the meeting formats legend table'
+    )
+    parser.add_argument(
+        '--formats-table-header-font-size',
+        dest='formats_table_header_font_size',
+        type=int,
+        default=14,
+        help='The font size used for the text displayed above the meeting formats legend table'
+    )
+    parser.add_argument(
+        '--formats-table-header-font-color',
+        dest='formats_table_header_font_color',
+        default='#000000',
+        help='The font color used for the text displayed above the meeting formats legend table'
+    )
+    parser.add_argument(
+        '--formats-table-header-fill-color',
+        dest='formats_table_header_fill_color',
+        default='#FFFFFF',
+        help='The background color used for the text displayed above the meeting formats legend table'
+    )
+    parser.add_argument(
+        '--formats-table-key-column-width',
+        dest='formats_table_key_column_width',
+        type=int,
+        default=10,
+        help='The width of the \'key\' column in the meeting formats legend table'
+    )
+    parser.add_argument(
+        '--formats-table-margin-width',
+        dest='formats_table_margin_width',
+        type=int,
+        default=10,
+        help='The amount of whitespace to the left and right of the meeting formats legend table'
+    )
 
     args = parser.parse_args()
     for id in args.service_body_ids.split(','):
@@ -174,5 +239,6 @@ if __name__ == '__main__':
     try:
         sys.exit(main())
     except Exception as e:
+        raise
         sys.stderr.write('Error: ' + str(e) + '\n')
         sys.exit(1)
