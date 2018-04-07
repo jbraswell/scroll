@@ -72,6 +72,11 @@ class Booklet:
         self.formats_table_header_font_color = formats_table_header_font_color
         self.formats_table_header_fill_color = formats_table_header_fill_color
 
+    def _get_scratch_pdf_obj(self):
+        if not hasattr(self, '_scratch_pdf'):
+            self._scratch_pdf = self._get_pdf_obj()
+        return self._scratch_pdf
+
     def _get_pdf_obj(self):
         if self.bookletize:
             # The bookletize option is for those who don't have, don't want to use, or don't
@@ -138,7 +143,7 @@ class Booklet:
         current_content_position = 0
         for m in self._meetings_data:
             append_objs = []
-            meeting = PDFMeeting(Meeting(m), self._get_pdf_obj, total_width, time_column_width=self.time_column_width,
+            meeting = PDFMeeting(Meeting(m), self._get_scratch_pdf_obj, total_width, time_column_width=self.time_column_width,
                                  duration_column_width=self.duration_column_width, font=self.meeting_font,
                                  font_size=self.meeting_font_size, separator_color=self.meeting_separator_color)
             new_main_header = getattr(meeting.meeting, self.main_header_field)
@@ -149,7 +154,7 @@ class Booklet:
                     text = new_main_header
                 header = PDFMainSectionHeader(
                     text,
-                    self._get_pdf_obj,
+                    self._get_scratch_pdf_obj,
                     total_width,
                     font=self.header_font,
                     font_size=self.header_font_size
@@ -166,7 +171,7 @@ class Booklet:
                         text = new_second_header
                     header = PDFSubSectionHeader(
                         text,
-                        self._get_pdf_obj,
+                        self._get_scratch_pdf_obj,
                         total_width,
                         font=self.header_font,
                         font_size=self.header_font_size
@@ -182,7 +187,7 @@ class Booklet:
         formats = [Format(f) for f in self._formats_data]
         formats_table = PDFFormatsTable(
             formats,
-            self._get_pdf_obj,
+            self._get_scratch_pdf_obj,
             total_width,
             font=self.meeting_font,
             font_size=self.meeting_font_size,
