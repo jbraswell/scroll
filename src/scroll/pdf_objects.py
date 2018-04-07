@@ -246,14 +246,15 @@ class PDFFormat:
 
     def write(self, pdf, border='LTRB'):
         pdf.set_text_color(0, 0, 0)
-        pdf.set_font(self.font, '', self.font_size)
         pdf.set_draw_color(*hex2dec('#000000'))
         key_cell_border = 0
         name_cell_border = 0
         if border:
-            key_cell_border = border.replace('R', '')
+            key_cell_border = border
             name_cell_border = border.replace('L', '')
+        pdf.set_font(self.font, 'B', self.font_size)
         pdf.cell(self.key_column_width, h=max(pdf.font_size + self.text_line_padding, self.height), txt=self.format.key, ln=0, align='L', border=key_cell_border)
+        pdf.set_font(self.font, '', self.font_size)
         pdf.multi_cell(self.name_column_width, h=pdf.font_size + self.text_line_padding, txt=self.format.name, border=name_cell_border)
 
 
