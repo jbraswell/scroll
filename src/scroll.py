@@ -239,6 +239,5 @@ if __name__ == '__main__':
     try:
         sys.exit(main())
     except Exception as e:
-        raise
         sys.stderr.write('Error: ' + str(e) + '\n')
         sys.exit(1)
