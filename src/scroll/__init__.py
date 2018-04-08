@@ -2,7 +2,7 @@ import os
 from fpdf import FPDF
 from .bmlt_objects import Format, Meeting
 from .pdf_objects import (PDFColumnEnd, PDFMainSectionHeader, PDFSubSectionHeader, PDFFormatsTable, PDFMeeting,
-                          PDFMainPagePlaceholder)
+                          PDFMainPagePlaceholder, PDFPhoneList)
 
 
 weekdays = [
@@ -133,7 +133,7 @@ class Booklet:
             return pos
 
         pdf_objects = [
-            PDFMainPagePlaceholder(),
+            PDFMainPagePlaceholder(self._get_scratch_pdf_obj),
             PDFColumnEnd()
         ]
 
@@ -192,15 +192,24 @@ class Booklet:
             font=self.meeting_font,
             font_size=self.meeting_font_size,
             table_header_text=self.formats_table_header_text,
-            table_header_font=self.formats_table_header_font,
-            table_header_font_size=self.formats_table_header_font_size,
+            header_font=self.formats_table_header_font,
+            header_font_size=self.formats_table_header_font_size,
             key_column_width=self.formats_table_key_column_width,
             margin_width=self.formats_table_margin_width,
             header_font_color=self.formats_table_header_font_color,
             header_fill_color=self.formats_table_header_fill_color
         )
         pdf_objects.append(formats_table)
-        # TODO Append phone numbers to fill additional space
+
+        # Fill in formats page with phone number list
+        blank_space = effective_page_height - formats_table.height
+        if blank_space > 0:
+            phone_list = PDFPhoneList(
+                self._get_scratch_pdf_obj,
+                total_width,
+                blank_space
+            )
+            pdf_objects.append(phone_list)
 
         return pdf_objects
 

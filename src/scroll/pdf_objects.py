@@ -23,20 +23,36 @@ def _get_lines(pdf, parts, max_line_length):
     return lines
 
 
-class PDFMainPagePlaceholder:
-    def write(self, pdf, x=None, y=None):
-        pass
-
-
 class PDFColumnEnd:
     pass
 
 
-class PDFSectionHeader:
+class PDFObject:
+    def __init__(self, pdf_func):
+        self.pdf_func = pdf_func
+
+    @property
+    def height(self):
+        raise NotImplementedError()
+
+    def write(self, pdf, x=None, y=None):
+        raise NotImplementedError()
+
+
+class PDFMainPagePlaceholder(PDFObject):
+    @property
+    def height(self):
+        pass
+
+    def write(self, pdf, x=None, y=None):
+        pass
+
+
+class PDFSectionHeader(PDFObject):
     def __init__(self, text, pdf_func, cell_width, line_padding=1, font='dejavusans', font_size=12,
                  font_color='#000000', fill_color='#FFFFFF'):
+        super().__init__(pdf_func)
         self.text = text
-        self.pdf_func = pdf_func
         self.cell_width = cell_width
         self.line_padding = line_padding
         self.font = font
@@ -104,11 +120,87 @@ class PDFSubSectionHeader(PDFSectionHeader):
         )
 
 
-class PDFFormatsTable:
+class PDFPhoneList(PDFObject):
+    def __init__(self, pdf_func, total_width, total_height, number_column_width=15, font='dejavusans', font_size=10,
+                 font_color='#000000', header_text='Phone Numbers', header_font='dejavusans', header_font_size=12,
+                 header_font_color='#000000', header_fill_color='#FFFFFF', header_top_margin=5, line_padding=5):
+        super().__init__(pdf_func)
+        self.total_width = total_width
+        self.total_height = total_height
+        self.number_column_width = number_column_width
+        self.font = font
+        self.font_size = font_size
+        self.font_color = font_color
+        self.header_text = header_text
+        self.header_font = header_font
+        self.header_font_size = header_font_size
+        self.header_font_color = header_font_color
+        self.header_fill_color = header_fill_color
+        self.header_top_margin = header_top_margin
+        self.line_padding = line_padding
+        self.num_numbers = int((total_height - self.header_height) / self.line_height)
+
+    @property
+    def line_height(self):
+        pdf = self.pdf_func()
+        pdf.set_font(self.font, '', self.font_size)
+        return pdf.font_size + self.line_padding
+
+    @property
+    def header_height(self):
+        header = PDFSectionHeader(
+            self.header_text,
+            self.pdf_func,
+            self.total_width,
+            font=self.header_font,
+            font_size=self.header_font_size,
+            font_color=self.header_font_color,
+            fill_color=self.header_fill_color
+        )
+        return header.height + self.header_top_margin + 3
+
+    @property
+    def height(self):
+        pdf = self.pdf_func()
+        return self.header_height + (self.line_height * self.num_numbers + pdf.line_width)
+
+    def write(self, pdf, x=None, y=None):
+        if x is not None and y is not None:
+            pdf.set_xy(x, y)
+        else:
+            x = pdf.get_x()
+        pdf.set_y(pdf.get_y() + self.header_top_margin)
+        header = PDFSectionHeader(
+            self.header_text,
+            self.pdf_func,
+            self.total_width,
+            font=self.header_font,
+            font_size=self.header_font_size,
+            font_color=self.header_font_color,
+            fill_color=self.header_fill_color
+        )
+        header.write(pdf)
+        pdf.ln(h=3)
+        pdf.set_x(x)
+        line_width = self.total_width - (self.number_column_width * 2)
+        pdf.set_draw_color(*hex2dec('#000000'))
+        for i in range(self.num_numbers):
+            pdf.set_font(self.font, '', self.font_size)
+            pdf.cell(self.number_column_width, h=pdf.font_size, txt=str(i + 1) + '.', align='R', ln=0)
+            pdf.line(
+                pdf.get_x(),
+                pdf.get_y() + pdf.font_size,
+                pdf.get_x() + line_width,
+                pdf.get_y() + pdf.font_size
+            )
+            pdf.set_xy(x, pdf.get_y() + pdf.font_size + self.line_padding)
+
+
+class PDFFormatsTable(PDFObject):
     def __init__(self, formats, pdf_func, total_width, margin_width=5, font='dejavusans', font_size=12,
-                 key_column_width=10, table_header_text=None, table_header_font='dejavusans',
-                 table_header_font_size=12, header_font_color='#000000', header_fill_color='#FFFFFF'):
-        self.pdf_func = pdf_func
+                 key_column_width=10, table_header_text=None, header_font='dejavusans',
+                 header_font_size=12, header_font_color='#000000', header_fill_color='#FFFFFF'):
+        super().__init__(pdf_func)
         self.font = font
         self.font_size = font_size
         self.total_width = total_width
@@ -117,8 +209,8 @@ class PDFFormatsTable:
         self.table_header_text = table_header_text
         if self.table_header_text is None:
             self.table_header_text = 'Meeting Format Legend'
-        self.table_header_font = table_header_font
-        self.table_header_font_size = table_header_font_size
+        self.header_font = header_font
+        self.header_font_size = header_font_size
         self.header_font_color = header_font_color
         self.header_fill_color = header_fill_color
         self.formats = [PDFFormat(f, pdf_func, self.key_column_width, self.name_column_width, font=font, font_size=font_size) for f in formats]
@@ -146,8 +238,8 @@ class PDFFormatsTable:
             self.table_header_text,
             self.pdf_func,
             self.total_width,
-            font=self.table_header_font,
-            font_size=self.table_header_font_size,
+            font=self.header_font,
+            font_size=self.header_font_size,
             font_color=self.header_font_color,
             fill_color=self.header_fill_color
         )
@@ -178,8 +270,8 @@ class PDFFormatsTable:
             self.table_header_text,
             self.pdf_func,
             self.total_width,
-            font=self.table_header_font,
-            font_size=self.table_header_font_size,
+            font=self.header_font,
+            font_size=self.header_font_size,
             font_color=self.header_font_color,
             fill_color=self.header_fill_color
         )
@@ -187,20 +279,18 @@ class PDFFormatsTable:
 
         left_x = x + (self.margin_width / 2)
         first = True
+        current_y = pdf.get_y()
         for i in range(len(self.formats)):
             left = i % 2 == 0
             format = self.formats[i]
-            if left:
-                pdf.set_x(left_x)
-            else:
-                pdf.set_x(left_x + self.total_column_width)
+            current_x = left_x if left else left_x + self.total_column_width
             if first:
                 border = 'LTRB' if left else 'TRB'
                 if not left:
                     first = False
             else:
                 border = 'LRB' if left else 'RB'
-            before_y = pdf.get_y()
+            before_y = current_y
             other = None
             if left and i < len(self.formats) - 1:
                 other = self.formats[i + 1]
@@ -209,21 +299,18 @@ class PDFFormatsTable:
             if other:
                 while format.height < other.height:
                     format.format.name += ' '
-            format.write(pdf, border=border)
-            if left:
-                pdf.set_y(before_y)
-            else:
-                pdf.set_y(before_y + max(format.height, other.height))
+            format.write(pdf, x=current_x, y=current_y, border=border)
+            current_y = before_y if left else before_y + max(format.height, other.height)
 
         pdf.set_xy(x, pdf.get_y())
 
 
-class PDFFormat:
+class PDFFormat(PDFObject):
     def __init__(self, format, pdf_func, key_column_width, name_column_width, font='dejavusans', font_size=10,
                  text_line_padding=1):
         if not isinstance(format, Format):
             raise TypeError('Expected Format object')
-        self.pdf_func = pdf_func
+        super().__init__(pdf_func)
         self.format = format
         self.key_column_width = key_column_width
         self.name_column_width = name_column_width
@@ -244,7 +331,9 @@ class PDFFormat:
         height = (text_height * len(lines)) + padding
         return height
 
-    def write(self, pdf, border='LTRB'):
+    def write(self, pdf, x=None, y=None, border='LTRB'):
+        if x is not None and y is not None:
+            pdf.set_xy(x, y)
         pdf.set_text_color(0, 0, 0)
         pdf.set_draw_color(*hex2dec('#000000'))
         key_cell_border = 0
@@ -258,12 +347,12 @@ class PDFFormat:
         pdf.multi_cell(self.name_column_width, h=pdf.font_size + self.text_line_padding, txt=self.format.name, border=name_cell_border)
 
 
-class PDFMeeting:
+class PDFMeeting(PDFObject):
     def __init__(self, meeting, pdf_func, total_width, time_column_width=None, duration_column_width=None,
                  font='dejavusans', font_size=12, separator_color='#D3D3D3'):
         if not isinstance(meeting, Meeting):
             raise TypeError('Expected Meeting object')
-        self.pdf_func = pdf_func
+        super().__init__(pdf_func)
         self.meeting = meeting
         self.time_column_width = time_column_width if time_column_width else 15
         self.duration_column_width = duration_column_width if duration_column_width else 15
