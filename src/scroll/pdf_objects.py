@@ -122,7 +122,7 @@ class PDFSubSectionHeader(PDFSectionHeader):
 
 class PDFPhoneList(PDFObject):
     def __init__(self, pdf_func, total_width, total_height, number_column_width=15, font='dejavusans', font_size=10,
-                 font_color='#000000', header_text='Phone Numbers', header_font='dejavusans', header_font_size=12,
+                 font_color='#000000', header_text='Phone Numbers', header_font='dejavusans', header_font_size=14,
                  header_font_color='#000000', header_fill_color='#FFFFFF', header_top_margin=5, line_padding=5):
         super().__init__(pdf_func)
         self.total_width = total_width
@@ -197,7 +197,7 @@ class PDFPhoneList(PDFObject):
 
 
 class PDFFormatsTable(PDFObject):
-    def __init__(self, formats, pdf_func, total_width, margin_width=5, font='dejavusans', font_size=12,
+    def __init__(self, formats, pdf_func, total_width, margin_width=5, font='dejavusans', font_size=14,
                  key_column_width=10, table_header_text=None, header_font='dejavusans',
                  header_font_size=12, header_font_color='#000000', header_fill_color='#FFFFFF'):
         super().__init__(pdf_func)
