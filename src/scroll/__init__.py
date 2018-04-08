@@ -39,7 +39,8 @@ class Booklet:
                  meeting_separator_color='#D3D3D3', formats_table_header_text='Meeting Format Legend',
                  formats_table_header_font='dejavusans', formats_table_header_font_size=14,
                  formats_table_key_column_width=10, formats_table_margin_width=5,
-                 formats_table_header_font_color='#000000', formats_table_header_fill_color='#FFFFFF'):
+                 formats_table_header_font_color='#000000', formats_table_header_fill_color='#FFFFFF',
+                 margin_width=6):
         self._meetings_data = meetings
         self._formats_data = formats
         self.output_file = output_file
@@ -71,6 +72,7 @@ class Booklet:
         self.formats_table_margin_width = formats_table_margin_width
         self.formats_table_header_font_color = formats_table_header_font_color
         self.formats_table_header_fill_color = formats_table_header_fill_color
+        self.margin_width = margin_width
 
     def _get_scratch_pdf_obj(self):
         if not hasattr(self, '_scratch_pdf'):
@@ -88,7 +90,7 @@ class Booklet:
             # using the "booklet" option on a printer, meaning two per page. For this reason,
             # we're dividing the specified paper size by 2.
             pdf = FPDF(format=(self.paper_size[1] / 2, self.paper_size[0]))
-        pdf.set_margins(5, 5)
+        pdf.set_margins(self.margin_width, self.margin_width)
         pdf.set_auto_page_break(0, 5)
         base_font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dejavu-fonts-ttf-2.37/ttf/')
         pdf.add_font('dejavusans', '', os.path.join(base_font_path, 'DejaVuSansCondensed.ttf'), uni=True)
@@ -101,7 +103,7 @@ class Booklet:
         pdf = self._get_pdf_obj()
         effective_page_width = pdf.w - pdf.l_margin - pdf.r_margin
         effective_page_height = pdf.h - pdf.t_margin - pdf.b_margin
-        total_width = (effective_page_width / 2) - 1 if self.bookletize else effective_page_width
+        total_width = (effective_page_width / 2) - self.margin_width if self.bookletize else effective_page_width
 
         pdf.add_page()
 
@@ -236,7 +238,7 @@ class Booklet:
         if self.bookletize:
             pdf.add_page()
             effective_page_width = pdf.w - pdf.l_margin - pdf.r_margin
-            column_width = (effective_page_width / 2) - 1
+            column_width = (effective_page_width / 2) - self.margin_width
 
             last_page = booklet_pages.pop()
             for obj in last_page:
@@ -244,7 +246,7 @@ class Booklet:
 
             first_page = booklet_pages.pop(0)
             for obj in first_page:
-                obj.write(pdf, x=column_width + pdf.l_margin + 2, y=pdf.get_y())
+                obj.write(pdf, x=column_width + pdf.l_margin + (self.margin_width * 2), y=pdf.get_y())
 
             total_booklet_length = len(booklet_pages)
             last_booklet_page_blank = total_booklet_length % 2 != 0
@@ -258,7 +260,7 @@ class Booklet:
                 right_page = booklet_pages.pop(0)
                 last_y = pdf.get_y()
                 for obj in right_page:
-                    obj.write(pdf, x=column_width + pdf.l_margin + 2, y=last_y)
+                    obj.write(pdf, x=column_width + pdf.l_margin + (self.margin_width * 2), y=last_y)
                     last_y = pdf.get_y()
 
             while booklet_pages:
@@ -274,7 +276,7 @@ class Booklet:
                     last_y = original_y
                     right_page = booklet_pages.pop(0) if odd_pdf_page else booklet_pages.pop()
                     for obj in right_page:
-                        obj.write(pdf, x=column_width + pdf.l_margin + 2, y=last_y)
+                        obj.write(pdf, x=column_width + pdf.l_margin + (self.margin_width * 2), y=last_y)
                         last_y = pdf.get_y()
         else:
             for page in booklet_pages:
