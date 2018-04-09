@@ -39,7 +39,7 @@ class PDFObject:
         raise NotImplementedError()
 
 
-class PDFMainPagePlaceholder(PDFObject):
+class PDFBlankPage(PDFObject):
     @property
     def height(self):
         pass
@@ -118,82 +118,6 @@ class PDFSubSectionHeader(PDFSectionHeader):
             font=self.font,
             font_size=self.font_size
         )
-
-
-class PDFPhoneList(PDFObject):
-    def __init__(self, pdf_func, total_width, total_height, number_column_width=15, font='dejavusans', font_size=10,
-                 font_color='#000000', header_text='Phone Numbers', header_font='dejavusans', header_font_size=14,
-                 header_font_color='#000000', header_fill_color='#FFFFFF', header_top_margin=5, line_padding=5):
-        super().__init__(pdf_func)
-        self.total_width = total_width
-        self.total_height = total_height
-        self.number_column_width = number_column_width
-        self.font = font
-        self.font_size = font_size
-        self.font_color = font_color
-        self.header_text = header_text
-        self.header_font = header_font
-        self.header_font_size = header_font_size
-        self.header_font_color = header_font_color
-        self.header_fill_color = header_fill_color
-        self.header_top_margin = header_top_margin
-        self.line_padding = line_padding
-        self.num_numbers = int((total_height - self.header_height) / self.line_height)
-
-    @property
-    def line_height(self):
-        pdf = self.pdf_func()
-        pdf.set_font(self.font, '', self.font_size)
-        return pdf.font_size + self.line_padding
-
-    @property
-    def header_height(self):
-        header = PDFSectionHeader(
-            self.header_text,
-            self.pdf_func,
-            self.total_width,
-            font=self.header_font,
-            font_size=self.header_font_size,
-            font_color=self.header_font_color,
-            fill_color=self.header_fill_color
-        )
-        return header.height + self.header_top_margin + 3
-
-    @property
-    def height(self):
-        pdf = self.pdf_func()
-        return self.header_height + (self.line_height * self.num_numbers + pdf.line_width)
-
-    def write(self, pdf, x=None, y=None):
-        if x is not None and y is not None:
-            pdf.set_xy(x, y)
-        else:
-            x = pdf.get_x()
-        pdf.set_y(pdf.get_y() + self.header_top_margin)
-        header = PDFSectionHeader(
-            self.header_text,
-            self.pdf_func,
-            self.total_width,
-            font=self.header_font,
-            font_size=self.header_font_size,
-            font_color=self.header_font_color,
-            fill_color=self.header_fill_color
-        )
-        header.write(pdf)
-        pdf.ln(h=3)
-        pdf.set_x(x)
-        line_width = self.total_width - (self.number_column_width * 2)
-        pdf.set_draw_color(*hex2dec('#000000'))
-        for i in range(self.num_numbers):
-            pdf.set_font(self.font, '', self.font_size)
-            pdf.cell(self.number_column_width, h=pdf.font_size, txt=str(i + 1) + '.', align='R', ln=0)
-            pdf.line(
-                pdf.get_x(),
-                pdf.get_y() + pdf.font_size,
-                pdf.get_x() + line_width,
-                pdf.get_y() + pdf.font_size
-            )
-            pdf.set_xy(x, pdf.get_y() + pdf.font_size + self.line_padding)
 
 
 class PDFFormatsTable(PDFObject):
@@ -446,3 +370,199 @@ class PDFMeeting(PDFObject):
 
         pdf.set_xy(x, pdf.get_y())
         pdf.ln(h=1)
+
+
+class PDFPhoneList(PDFObject):
+    def __init__(self, pdf_func, total_width, total_height, number_column_width=15, font='dejavusans', font_size=10,
+                 font_color='#000000', header_text='Phone Numbers', header_font='dejavusans', header_font_size=14,
+                 header_font_color='#000000', header_fill_color='#FFFFFF', header_top_margin=5, line_padding=5):
+        super().__init__(pdf_func)
+        self.total_width = total_width
+        self.total_height = total_height
+        self.number_column_width = number_column_width
+        self.font = font
+        self.font_size = font_size
+        self.font_color = font_color
+        self.header_text = header_text
+        self.header_font = header_font
+        self.header_font_size = header_font_size
+        self.header_font_color = header_font_color
+        self.header_fill_color = header_fill_color
+        self.header_top_margin = header_top_margin
+        self.line_padding = line_padding
+        self.num_numbers = int((total_height - self.header_height) / self.line_height)
+
+    @property
+    def line_height(self):
+        pdf = self.pdf_func()
+        pdf.set_font(self.font, '', self.font_size)
+        return pdf.font_size + self.line_padding
+
+    @property
+    def header_height(self):
+        header = PDFSectionHeader(
+            self.header_text,
+            self.pdf_func,
+            self.total_width,
+            font=self.header_font,
+            font_size=self.header_font_size,
+            font_color=self.header_font_color,
+            fill_color=self.header_fill_color
+        )
+        return header.height + self.header_top_margin + 3
+
+    @property
+    def height(self):
+        pdf = self.pdf_func()
+        return self.header_height + (self.line_height * self.num_numbers + pdf.line_width)
+
+    def write(self, pdf, x=None, y=None):
+        if x is not None and y is not None:
+            pdf.set_xy(x, y)
+        x = pdf.get_x()
+        pdf.set_xy(x, pdf.get_y() + self.header_top_margin)
+        header = PDFSectionHeader(
+            self.header_text,
+            self.pdf_func,
+            self.total_width,
+            font=self.header_font,
+            font_size=self.header_font_size,
+            font_color=self.header_font_color,
+            fill_color=self.header_fill_color
+        )
+        header.write(pdf)
+        pdf.ln(h=3)
+        pdf.set_x(x)
+        line_width = self.total_width - (self.number_column_width * 2)
+        pdf.set_draw_color(*hex2dec('#000000'))
+        for i in range(self.num_numbers):
+            pdf.set_font(self.font, '', self.font_size)
+            pdf.cell(self.number_column_width, h=pdf.font_size, txt=str(i + 1) + '.', align='R', ln=0)
+            pdf.line(
+                pdf.get_x(),
+                pdf.get_y() + pdf.font_size,
+                pdf.get_x() + line_width,
+                pdf.get_y() + pdf.font_size
+            )
+            pdf.set_xy(x, pdf.get_y() + pdf.font_size + self.line_padding)
+
+
+class PDFTwelveSteps(PDFObject):
+    def __init__(self, pdf_func, total_width, font='dejavusans', font_size=12, font_color='#000000',
+                 header_text='The Twelve Steps of NA', header_font='dejavusans', header_font_size=14,
+                 header_font_color='#000000', header_fill_color='#FFFFFF', header_top_margin=0, line_padding=0,
+                 number_colulmn_width=10):
+        super().__init__(pdf_func)
+        self.total_width = total_width
+        self.font = font
+        self.font_size = font_size
+        self.font_color = font_color
+        self.header_text = header_text
+        self.header_font = header_font
+        self.header_font_size = header_font_size
+        self.header_font_color = header_font_color
+        self.header_fill_color = header_fill_color
+        self.header_top_margin = header_top_margin
+        self.line_padding = line_padding
+        self.number_column_width = number_colulmn_width
+
+    @property
+    def steps(self):
+        return [
+            'We admitted that we were powerless over our addiction, that our lives had become unmanageable.',
+            'We came to believe that a Power greater than ourselves could restore us to sanity.',
+            'We made a decision to turn our will and our lives over to the care of God as we understood Him.',
+            'We made a searching and fearless moral inventory of ourselves.',
+            'We admitted to God, to ourselves, and to another human being the exact nature of our wrongs.',
+            'We were entirely ready to have God remove all these defects of character.',
+            'We humbly asked Him to remove our shortcomings.',
+            'We made a list of all persons we had harmed, and became willing to make amends to them all.',
+            'We made direct amends to such people wherever possible, except when to do so would injure them or others.',
+            'We continued to take personal inventory and when we were wrong promptly admitted it.',
+            'We sought through prayer and meditation to improve our conscious contact with God as we understood Him, praying only for knowledge of His will for us and the power to carry that out.',
+            'Having had a spiritual awakening as a result of these steps, we tried to carry this message to addicts, and to practice these principles in all our affairs.',
+        ]
+
+    @property
+    def header_height(self):
+        header = PDFSectionHeader(
+            self.header_text,
+            self.pdf_func,
+            self.total_width,
+            font=self.header_font,
+            font_size=self.header_font_size,
+            font_color=self.header_font_color,
+            fill_color=self.header_fill_color
+        )
+        return header.height + self.header_top_margin + 3
+
+    @property
+    def steps_height(self):
+        pdf = self.pdf_func()
+        pdf.set_font(self.font, '', self.font_size)
+        text_height = pdf.font_size
+        height = 0
+        for step in self.steps:
+            parts = step.split()
+            lines = _get_lines(pdf, parts, self.steps_column_width)
+            padding = len(lines) * self.line_padding
+            height += (text_height * len(lines)) + padding
+        height += text_height * len(self.steps) - 1
+        return height
+
+    @property
+    def height(self):
+        return self.header_height + self.steps_height
+
+    @property
+    def steps_column_width(self):
+        return self.total_width - (self.number_column_width * 2)
+
+    def write(self, pdf, x=None, y=None):
+        if x is not None and y is not None:
+            pdf.set_xy(x, y)
+        x = pdf.get_x()
+        pdf.set_xy(x, pdf.get_y() + self.header_top_margin)
+        header = PDFSectionHeader(
+            self.header_text,
+            self.pdf_func,
+            self.total_width,
+            font=self.header_font,
+            font_size=self.header_font_size,
+            font_color=self.header_font_color,
+            fill_color=self.header_fill_color
+        )
+        header.write(pdf)
+        pdf.ln(h=3)
+        pdf.set_x(x)
+        for i in range(len(self.steps)):
+            pdf.set_font(self.font, '', self.font_size)
+            pdf.cell(self.number_column_width, h=pdf.font_size, txt=str(i + 1) + '.', align='R', ln=0)
+            pdf.multi_cell(self.steps_column_width, h=pdf.font_size + self.line_padding, txt=self.steps[i], border=0)
+            pdf.ln(h=pdf.font_size + self.line_padding)
+            if i < len(self.steps) - 1:
+                pdf.set_xy(x, pdf.get_y())
+
+
+class PDFTwelveTraditions(PDFTwelveSteps):
+    def __init__(self, *args, **kwargs):
+        if 'header_text' not in kwargs:
+            kwargs['header_text'] = 'The Twelve Traditions of NA'
+        super().__init__(*args, **kwargs)
+
+    @property
+    def steps(self):
+        return [
+            'Our common welfare should come first; personal recovery depends on NA unity.',
+            'For our group purpose there is but one ultimate authority—a loving God as He may express Himself in our group conscience. Our leaders are but trusted servants; they do not govern.',
+            'The only requirement for membership is a desire to stop using.',
+            'Each group should be autonomous except in matters affecting other groups or NA as a whole.',
+            'Each group has but one primary purpose—to carry the message to the addict who still suffers.',
+            'An NA group ought never endorse, finance, or lend the NA name to any related facility or outside enterprise, lest problems of money, property, or prestige divert us from our primary purpose.',
+            'Every NA group ought to be fully self-supporting, declining outside contributions.',
+            'Narcotics Anonymous should remain forever nonprofessional, but our service centers may employ special workers.',
+            'NA, as such, ought never be organized, but we may create service boards or committees directly responsible to those they serve.',
+            'Narcotics Anonymous has no opinion on outside issues; hence the NA name ought never be drawn into public controversy.',
+            'Our public relations policy is based on attraction rather than promotion; we need always maintain personal anonymity at the level of press, radio, and films.',
+            'Anonymity is the spiritual foundation of all our traditions, ever reminding us to place principles before personalities.',
+        ]

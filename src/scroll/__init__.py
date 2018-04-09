@@ -2,7 +2,7 @@ import os
 from fpdf import FPDF
 from .bmlt_objects import Format, Meeting
 from .pdf_objects import (PDFColumnEnd, PDFMainSectionHeader, PDFSubSectionHeader, PDFFormatsTable, PDFMeeting,
-                          PDFMainPagePlaceholder, PDFPhoneList)
+                          PDFBlankPage, PDFPhoneList, PDFTwelveSteps, PDFTwelveTraditions)
 
 
 weekdays = [
@@ -99,17 +99,27 @@ class Booklet:
         pdf.add_font('dejavuserif', 'B', os.path.join(base_font_path, 'DejaVuSerifCondensed-Bold.ttf'), uni=True)
         return pdf
 
+    @property
+    def booklet_page_width(self):
+        width = self.effective_page_width
+        if self.bookletize:
+            width = (self.effective_page_width / 2) - self.margin_width
+        return width
+
+    @property
+    def effective_page_width(self):
+        pdf = self._get_scratch_pdf_obj()
+        return pdf.w - pdf.l_margin - pdf.r_margin
+
+    @property
+    def effective_page_height(self):
+        pdf = self._get_scratch_pdf_obj()
+        return pdf.h - pdf.t_margin - pdf.b_margin
+
     def get_pdf_objects(self):
-        pdf = self._get_pdf_obj()
-        effective_page_width = pdf.w - pdf.l_margin - pdf.r_margin
-        effective_page_height = pdf.h - pdf.t_margin - pdf.b_margin
-        total_width = (effective_page_width / 2) - self.margin_width if self.bookletize else effective_page_width
-
-        pdf.add_page()
-
         def _append_pdf_objects(l, objs, pos):
             height = sum([o.height for o in objs])
-            if pos + height > effective_page_height:
+            if pos + height > self.effective_page_height:
                 l.append(PDFColumnEnd())
                 if not isinstance(objs[0], PDFMainSectionHeader):
                     for obj in l[::-1]:
@@ -135,7 +145,7 @@ class Booklet:
             return pos
 
         pdf_objects = [
-            PDFMainPagePlaceholder(self._get_scratch_pdf_obj),
+            PDFBlankPage(self._get_scratch_pdf_obj),
             PDFColumnEnd()
         ]
 
@@ -145,9 +155,14 @@ class Booklet:
         current_content_position = 0
         for m in self._meetings_data:
             append_objs = []
-            meeting = PDFMeeting(Meeting(m), self._get_scratch_pdf_obj, total_width, time_column_width=self.time_column_width,
-                                 duration_column_width=self.duration_column_width, font=self.meeting_font,
-                                 font_size=self.meeting_font_size, separator_color=self.meeting_separator_color)
+            meeting = PDFMeeting(
+                Meeting(m), self._get_scratch_pdf_obj, self.booklet_page_width,
+                time_column_width=self.time_column_width,
+                duration_column_width=self.duration_column_width,
+                font=self.meeting_font,
+                font_size=self.meeting_font_size,
+                separator_color=self.meeting_separator_color
+            )
             new_main_header = getattr(meeting.meeting, self.main_header_field)
             if new_main_header != prev_main_header:
                 if self.main_header_field == self.HEADER_FIELD_WEEKDAY:
@@ -157,7 +172,7 @@ class Booklet:
                 header = PDFMainSectionHeader(
                     text,
                     self._get_scratch_pdf_obj,
-                    total_width,
+                    self.booklet_page_width,
                     font=self.header_font,
                     font_size=self.header_font_size
                 )
@@ -174,7 +189,7 @@ class Booklet:
                     header = PDFSubSectionHeader(
                         text,
                         self._get_scratch_pdf_obj,
-                        total_width,
+                        self.booklet_page_width,
                         font=self.header_font,
                         font_size=self.header_font_size
                     )
@@ -190,7 +205,7 @@ class Booklet:
         formats_table = PDFFormatsTable(
             formats,
             self._get_scratch_pdf_obj,
-            total_width,
+            self.booklet_page_width,
             font=self.meeting_font,
             font_size=self.meeting_font_size,
             table_header_text=self.formats_table_header_text,
@@ -204,15 +219,10 @@ class Booklet:
         pdf_objects.append(formats_table)
 
         # Fill in formats page with phone number list
-        blank_space = effective_page_height - formats_table.height
-        if blank_space > 0:
-            phone_list = PDFPhoneList(
-                self._get_scratch_pdf_obj,
-                total_width,
-                blank_space
-            )
+        blank_space = self.effective_page_height - formats_table.height
+        phone_list = PDFPhoneList(self._get_scratch_pdf_obj, self.booklet_page_width, blank_space)
+        if phone_list.height <= blank_space:
             pdf_objects.append(phone_list)
-
         return pdf_objects
 
     def get_pages(self):
@@ -229,11 +239,43 @@ class Booklet:
             if i == len(pdf_objects) - 1:
                 pages.append(current_page)
                 current_page = []
+
+        # Make sure the number of pages is a multiple of 4, and fill in the
+        # blank pages
+        available_page_fillers = [PDFTwelveSteps, PDFTwelveTraditions]
+        used_page_fillers = []
+
+        blank_pages = 4 - len(pages) % 4
+        if blank_pages == 4:
+            # TODO Allow people to force the extra 4 pages
+            # because maybe they _want_ the filler pages
+            blank_pages = 0
+        for i in range(blank_pages):
+            add_obj = None
+            add_obj_cls = None
+            # Grow the filler to fill up as much of the page as possible
+            for cls in [f for f in available_page_fillers if f not in used_page_fillers]:
+                font_size = 8
+                while True:
+                    instance = cls(self._get_scratch_pdf_obj, self.booklet_page_width, font_size=font_size)
+                    if instance.height < self.effective_page_height:
+                        add_obj = instance
+                        add_obj_cls = cls
+                        font_size += 1
+                        continue
+                    break
+                if add_obj:
+                    break
+            if add_obj:
+                used_page_fillers.append(add_obj_cls)
+                pages.insert(len(pages) - 1, [add_obj])
+            else:
+                pages.insert(len(pages) - 1, [PDFBlankPage(self._get_scratch_pdf_obj)])
         return pages
 
     def write_pdf(self):
-        booklet_pages = self.get_pages()
         pdf = self._get_pdf_obj()
+        booklet_pages = self.get_pages()
 
         if self.bookletize:
             pdf.add_page()
