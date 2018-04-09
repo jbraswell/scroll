@@ -538,7 +538,13 @@ class PDFTwelveSteps(PDFObject):
         for i in range(len(self.steps)):
             pdf.set_font(self.font, '', self.font_size)
             pdf.cell(self.number_column_width, h=pdf.font_size, txt=str(i + 1) + '.', align='R', ln=0)
-            pdf.multi_cell(self.steps_column_width, h=pdf.font_size + self.line_padding, txt=self.steps[i], border=0)
+            pdf.multi_cell(
+                self.steps_column_width,
+                h=pdf.font_size + self.line_padding,
+                txt=self.steps[i],
+                align='L',
+                border=0
+            )
             pdf.ln(h=pdf.font_size + self.line_padding)
             if i < len(self.steps) - 1:
                 pdf.set_xy(x, pdf.get_y())
