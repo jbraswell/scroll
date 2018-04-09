@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime
 import json
 import requests
 import urllib.parse
@@ -229,8 +230,13 @@ def main():
     if args.main_header_field == args.second_header_field:
         raise Exception('--main-header-field and --second-header-field cannot be the same')
 
+    start_time = datetime.now()
     meetings, formats = get_data(args)
+    after_get_data = datetime.now()
+    sys.stdout.write('get_data completed in {}s\n'.format((after_get_data - start_time).total_seconds()))
     get_pdf(args, meetings, formats)
+    after_get_pdf = datetime.now()
+    sys.stdout.write('get_pdf completed in {}s\n'.format((after_get_pdf - after_get_data).total_seconds()))
 
     return 0
 
