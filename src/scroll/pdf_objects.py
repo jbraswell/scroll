@@ -1,11 +1,52 @@
 import re
+from html.parser import HTMLParser
 from fpdf.html import hex2dec
 from .bmlt_objects import Format, Meeting
 
 
-def _get_lines(pdf, parts, max_line_length):
+class StyledString:
+    def __init__(self, value, style=''):
+        self.value = str(value)
+        self.style = style.upper()
+
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return self.style + ':' + self.value
+
+    def split(self, *args, **kwargs):
+        return [StyledString(s, style=self.style) for s in self.value.split(*args, **kwargs)]
+
+
+class StyledStringParser(HTMLParser):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.output = []
+        self.tags = []
+
+    def reset(self):
+        super().reset()
+        self.output = []
+        self.tags = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ('b', 'i', 'u'):
+            self.tags.append(tag)
+
+    def handle_endtag(self, tag):
+        if self.tags:
+            self.tags.pop()
+
+    def handle_data(self, data):
+        style = ''.join(set(self.tags))
+        self.output.append(StyledString(data, style=style))
+
+
+def get_multi_cell_lines(pdf, text, max_line_length):
     lines = []
     current_line = ''
+    parts = re.split(r' ', text)
     for i in range(len(parts)):
         part = parts[i]
         proposed_line = current_line + ' ' + part if current_line else current_line + part
@@ -18,6 +59,60 @@ def _get_lines(pdf, parts, max_line_length):
         if pdf.get_string_width(current_line) + 2 * pdf.c_margin > max_line_length:
             lines.append(current_line)
             current_line = ''
+        elif i == len(parts) - 1:
+            lines.append(current_line)
+    return lines
+
+
+def get_styled_line_cells(pdf, text, max_line_length, font, font_style, font_size):
+    parser = StyledStringParser()
+    parser.feed(text)
+    parts = []
+    for part in parser.output:
+        if isinstance(part, StyledString):
+            parts.extend([StyledString(p, style=part.style) for p in re.split(r' ', part.value)])
+        else:
+            parts.extend(part)
+
+    lines = []
+    current_line = []
+    for i in range(len(parts)):
+        part = parts[i]
+        proposed_line = current_line.copy()
+        if proposed_line:
+            if isinstance(proposed_line[-1], StyledString) and isinstance(part, StyledString):
+                if proposed_line[-1].style == part.style:
+                    proposed_line[-1] = StyledString(str(proposed_line[-1]) + ' ' + str(part), style=part.style)
+                else:
+                    proposed_line.append(part)
+            elif isinstance(proposed_line[-1], str) and isinstance(part, str):
+                proposed_line[-1] = proposed_line[-1] + ' ' + part
+            else:
+                proposed_line.append(part)
+        else:
+            proposed_line.append(part)
+
+        def get_width(line):
+            w = 0
+            for s in line:
+                if isinstance(s, StyledString):
+                    pdf.set_font(font, s.style, font_size)
+                else:
+                    pdf.set_font(font, font_style, font_size)
+                w += pdf.get_string_width(str(s))
+            return w
+
+        width = get_width(proposed_line)
+        if width + len(proposed_line) * 2 * pdf.c_margin > max_line_length:
+            lines.append(current_line)
+            current_line = [part]
+        else:
+            current_line = proposed_line
+
+        width = get_width(current_line)
+        if width + len(proposed_line) * 2 * pdf.c_margin > max_line_length:
+            lines.append(current_line)
+            current_line = []
         elif i == len(parts) - 1:
             lines.append(current_line)
     return lines
@@ -247,9 +342,7 @@ class PDFFormat(PDFObject):
         pdf = self.pdf_func()
 
         pdf.set_font(self.font, '', self.font_size)
-        name = self.format.name
-        parts = re.split(r' ', name)
-        lines = _get_lines(pdf, parts, self.name_column_width)
+        lines = get_multi_cell_lines(pdf, self.format.name, self.name_column_width)
         text_height = pdf.font_size
         padding = len(lines) * self.text_line_padding
         height = (text_height * len(lines)) + padding
@@ -326,15 +419,13 @@ class PDFMeeting(PDFObject):
         meeting_formats = self.get_formats()
         if meeting_formats:
             meeting_name += ' ' + meeting_formats
-        parts = meeting_name.split()
-        lines = _get_lines(pdf, parts, self.meeting_column_width)
+        lines = get_multi_cell_lines(pdf, meeting_name, self.meeting_column_width)
         text_height = pdf.font_size
         height = (text_height * len(lines))
 
         pdf.set_font(self.font, '', self.font_size)
         meeting_location = self.get_location()
-        parts = meeting_location.split()
-        lines = _get_lines(pdf, parts, self.meeting_column_width)
+        lines = get_multi_cell_lines(pdf, meeting_location, self.meeting_column_width)
         text_height = pdf.font_size
         height += (text_height * len(lines))
         return height + pdf.line_width + 2  # 1mm line break before and after line
@@ -471,7 +562,7 @@ class PDFTwelveSteps(PDFObject):
         return [
             'We admitted that we were powerless over our addiction, that our lives had become unmanageable.',
             'We came to believe that a Power greater than ourselves could restore us to sanity.',
-            'We made a decision to turn our will and our lives over to the care of God as we understood Him.',
+            'We made a decision to turn our will and our lives over to the care of God <i>as we understood Him</i>.',
             'We made a searching and fearless moral inventory of ourselves.',
             'We admitted to God, to ourselves, and to another human being the exact nature of our wrongs.',
             'We were entirely ready to have God remove all these defects of character.',
@@ -479,7 +570,7 @@ class PDFTwelveSteps(PDFObject):
             'We made a list of all persons we had harmed, and became willing to make amends to them all.',
             'We made direct amends to such people wherever possible, except when to do so would injure them or others.',
             'We continued to take personal inventory and when we were wrong promptly admitted it.',
-            'We sought through prayer and meditation to improve our conscious contact with God as we understood Him, praying only for knowledge of His will for us and the power to carry that out.',
+            'We sought through prayer and meditation to improve our conscious contact with God <i>as we understood Him</i>, praying only for knowledge of His will for us and the power to carry that out.',
             'Having had a spiritual awakening as a result of these steps, we tried to carry this message to addicts, and to practice these principles in all our affairs.',
         ]
 
@@ -503,8 +594,7 @@ class PDFTwelveSteps(PDFObject):
         text_height = pdf.font_size
         height = 0
         for step in self.steps:
-            parts = step.split()
-            lines = _get_lines(pdf, parts, self.steps_column_width)
+            lines = get_styled_line_cells(pdf, step, self.steps_column_width, self.font, '', self.font_size)
             padding = len(lines) * self.line_padding
             height += (text_height * len(lines)) + padding
         height += text_height * len(self.steps) - 1
@@ -538,14 +628,18 @@ class PDFTwelveSteps(PDFObject):
         for i in range(len(self.steps)):
             pdf.set_font(self.font, '', self.font_size)
             pdf.cell(self.number_column_width, h=pdf.font_size, txt=str(i + 1) + '.', align='R', ln=0)
-            pdf.multi_cell(
-                self.steps_column_width,
-                h=pdf.font_size + self.line_padding,
-                txt=self.steps[i],
-                align='L',
-                border=0
-            )
+            step = self.steps[i]
+            lines = get_styled_line_cells(pdf, step, self.steps_column_width, self.font, '', self.font_size)
+            for line in lines:
+                for text in line:
+                    style = text.style if isinstance(text, StyledString) else ''
+                    text = str(text)
+                    pdf.set_font(self.font, style, self.font_size)
+                    pdf.cell(pdf.get_string_width(text), h=pdf.font_size, txt=text, align='L', ln=0)
+                pdf.ln(h=pdf.font_size + self.line_padding)
+                pdf.set_xy(x + self.number_column_width, pdf.get_y())
             pdf.ln(h=pdf.font_size + self.line_padding)
+            pdf.set_xy(x + self.number_column_width, pdf.get_y())
             if i < len(self.steps) - 1:
                 pdf.set_xy(x, pdf.get_y())
 

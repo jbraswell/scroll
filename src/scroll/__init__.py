@@ -95,8 +95,12 @@ class Booklet:
         base_font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dejavu-fonts-ttf-2.37/ttf/')
         pdf.add_font('dejavusans', '', os.path.join(base_font_path, 'DejaVuSansCondensed.ttf'), uni=True)
         pdf.add_font('dejavusans', 'B', os.path.join(base_font_path, 'DejaVuSansCondensed-Bold.ttf'), uni=True)
+        pdf.add_font('dejavusans', 'I', os.path.join(base_font_path, 'DejaVuSansCondensed-Oblique.ttf'), uni=True)
+        pdf.add_font('dejavusans', 'BI', os.path.join(base_font_path, 'DejaVuSansCondensed-BoldOblique.ttf'), uni=True)
         pdf.add_font('dejavuserif', '', os.path.join(base_font_path, 'DejaVuSerifCondensed.ttf'), uni=True)
         pdf.add_font('dejavuserif', 'B', os.path.join(base_font_path, 'DejaVuSerifCondensed-Bold.ttf'), uni=True)
+        pdf.add_font('dejavuserif', 'I', os.path.join(base_font_path, 'DejaVuSerifCondensed-Italic.ttf'), uni=True)
+        pdf.add_font('dejavuserif', 'BI', os.path.join(base_font_path, 'DejaVuSerifCondensed-BoldItalic.ttf'), uni=True)
         return pdf
 
     @property
